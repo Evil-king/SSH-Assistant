@@ -1,0 +1,22 @@
+[
+  {
+    "alias": "demo-web",
+    "name": "演示 Web 服务器",
+    "host": "192.0.2.10",
+    "port": 22,
+    "user": "root",
+    "password": "change-me",
+    "tags": ["生产", "demo"],
+    "color": "#1f6feb"
+  },
+  {
+    "alias": "demo-db",
+    "name": "演示数据库跳板",
+    "host": "198.51.100.7",
+    "port": 60022,
+    "user": "deploy",
+    "password": "change-me-too",
+    "tags": ["预生产", "db"],
+    "color": "#bf8700"
+  }
+]

@@ -1,0 +1,6 @@
+#!/bin/bash
+# 打开「SSH 主机」选择器（终端）
+APP="$HOME/Applications/SSH 主机.app"
+[ -d "$APP" ] || APP="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd)/SSH 主机.app"
+[ -d "$APP" ] || { echo "找不到 SSH 主机.app，先运行 install.sh" >&2; exit 1; }
+exec /usr/bin/open "$APP"

@@ -1,0 +1,39 @@
+#!/bin/bash
+# wssh <别名|user@host> [ssh 参数...]     也可写成 wssh -o XXX=1 <别名> ...
+# 只在凭据表里有该 用户@主机:端口 时接管密码（askpass），否则原样交给 ssh。
+set -u
+
+# 找出「目标主机」参数：跳过带值的选项，取第一个非 - 开头的参数
+args=("$@")
+target=""
+i=0
+while [ "$i" -lt "${#args[@]}" ]; do
+  a="${args[$i]}"
+  case "$a" in
+    -o|-p|-l|-i|-F|-J|-L|-R|-D|-W|-e|-b|-c|-m|-O|-Q|-S|-w|-E|-I)
+      i=$((i + 2)); continue ;;
+    --)
+      i=$((i + 1)); [ "$i" -lt "${#args[@]}" ] && target="${args[$i]}"; break ;;
+    -*) i=$((i + 1)); continue ;;
+    *) target="$a"; break ;;
+  esac
+done
+
+if [ -n "$target" ]; then
+  cfg="$(ssh -G "$target" 2>/dev/null)" || cfg=""
+  host="$(printf '%s\n' "$cfg" | awk '/^hostname /{print $2; exit}')"
+  port="$(printf '%s\n' "$cfg" | awk '/^port /{print $2; exit}')"
+  user="$(printf '%s\n' "$cfg" | awk '/^user /{print $2; exit}')"
+  : "${port:=22}"
+
+  CRED="$HOME/.ssh/work-info-credentials"
+  if [ -n "$host" ] && [ -r "$CRED" ] && \
+     awk -F'\t' -v k="${user}@${host}:${port}" '$1 == k { found = 1 } END { exit !found }' "$CRED"; then
+    export WORK_SSH_HOST="$host" WORK_SSH_PORT="$port" WORK_SSH_USER="$user"
+    export SSH_ASKPASS="$HOME/.ssh/work-info-askpass"
+    export SSH_ASKPASS_REQUIRE=force
+    export DISPLAY="${DISPLAY:-:0}"
+  fi
+fi
+
+exec ssh "$@"

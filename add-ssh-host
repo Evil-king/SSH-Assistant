@@ -1,0 +1,6 @@
+#!/bin/bash
+# 打开「添加 SSH 主机」表单
+APP="$HOME/Applications/添加SSH.app"
+[ -d "$APP" ] || APP="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd)/添加SSH.app"
+[ -d "$APP" ] || { echo "找不到 添加SSH.app，先运行 install.sh" >&2; exit 1; }
+exec /usr/bin/open "$APP"

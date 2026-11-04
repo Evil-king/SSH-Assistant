@@ -1,0 +1,17 @@
+#!/bin/bash
+# OpenSSH askpass 助手：按 用户@主机:端口 从 ~/.ssh/work-info-credentials 取密码写到 stdout。
+# 不接收命令行参数中的密码，因此密码不会出现在 ps 里。
+CRED="${HOME}/.ssh/work-info-credentials"
+key="${WORK_SSH_USER:-}@${WORK_SSH_HOST:-}:${WORK_SSH_PORT:-22}"
+
+pw="$(awk -F'\t' -v k="$key" '$1 == k { print $2; exit }' "$CRED" 2>/dev/null)"
+
+if [ -z "$pw" ] && [ -n "${1:-}" ]; then
+  # 兜底：从提示语里解析 host，例如 "idx@1.2.3.4's password:"
+  host="$(printf '%s' "$1" | sed -n "s/.*@\([[:alnum:]._-]*\)'s password.*/\1/p")"
+  if [ -n "$host" ]; then
+    pw="$(awk -F'\t' -v h="$host" 'index($1, "@" h ":") { print $2; exit }' "$CRED" 2>/dev/null)"
+  fi
+fi
+
+printf '%s\n' "$pw"

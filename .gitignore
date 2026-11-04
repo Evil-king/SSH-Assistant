@@ -1,0 +1,12 @@
+# 本地数据 / 生成物（含明文密码，千万别提交）
+hosts.json
+credentials.tsv
+ssh_config_work
+dynamic-profiles.json
+
+# 构建产物
+build/
+*.iconset
+
+# macOS
+.DS_Store
