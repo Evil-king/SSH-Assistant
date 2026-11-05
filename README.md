@@ -28,7 +28,7 @@ macOS 原生小工具：把 SSH 主机信息（别名 / IP / 端口 / 用户 / �
 
 | 文件 | 作用 |
 |---|---|
-| `hosts.json` | 主机数据源（**不入库**，从 `hosts.example.json` 复制） |
+| `hosts.json` | 主机数据源（**不入库**，从 `hosts.example.json` 复制；默认放 `~/Library/Application Support/SSHAssistant`） |
 | `SSHHosts.swift` | 唯一 App 源码：列表 + 表单 + 终端适配 |
 | `add_host.py` | 命令行新增/编辑：写 JSON → 生成 → 安装 |
 | `gen_all.py` | 由 `hosts.json` 生成 ssh 配置 / iTerm2 profile / 密码表 |
@@ -43,9 +43,12 @@ macOS 原生小工具：把 SSH 主机信息（别名 / IP / 端口 / 用户 / �
 
 ## 快速开始
 
+推荐把仓库放在数据目录里（App 默认会去这里找 `hosts.json`，不怕桌面被清理）：
+
 ```bash
-git clone git@github.com:Evil-king/SSH-Assistant.git
-cd SSH-Assistant
+git clone git@github.com:Evil-king/SSH-Assistant.git \
+  "$HOME/Library/Application Support/SSHAssistant"
+cd "$HOME/Library/Application Support/SSHAssistant"
 cp hosts.example.json hosts.json      # 改成你自己的主机
 ./install.sh                          # 写入 ~/.ssh、iTerm2、~/Applications
 ```

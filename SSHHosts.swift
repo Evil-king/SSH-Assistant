@@ -70,11 +70,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSTableViewDataSource,
                 return URL(fileURLWithPath: dir)
             }
         }
+        let support = FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent("Library/Application Support/SSHAssistant")
+        if FileManager.default.fileExists(atPath: support.appendingPathComponent("hosts.json").path) {
+            return support
+        }
         let parent = Bundle.main.bundleURL.deletingLastPathComponent()
         if FileManager.default.fileExists(atPath: parent.appendingPathComponent("hosts.json").path) {
             return parent
         }
-        return parent   // app 与仓库同级时，用仓库目录
+        return support   // 默认数据目录（不存在时表单会提示）
     }
 
     var shortcutsDir: URL {
@@ -171,6 +176,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSTableViewDataSource,
             self, selector: #selector(didActivate),
             name: NSApplication.didBecomeActiveNotification, object: nil)
 
+        buildMenu()
+
         // 点哪个图标都先进列表；编辑/添加再用 sheet
         if let alias = argValue("--edit") {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { [weak self] in
@@ -189,6 +196,37 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSTableViewDataSource,
                 NSApp.terminate(nil)
             }
         }
+    }
+
+    func buildMenu() {
+        let main = NSMenu()
+
+        let appItem = NSMenuItem()
+        main.addItem(appItem)
+        let appMenu = NSMenu()
+        appItem.submenu = appMenu
+        appMenu.addItem(withTitle: "关于 SSH 主机",
+                        action: #selector(NSApplication.orderFrontStandardAboutPanel(_:)),
+                        keyEquivalent: "")
+        appMenu.addItem(.separator())
+        appMenu.addItem(withTitle: "退出", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
+
+        let fileItem = NSMenuItem()
+        main.addItem(fileItem)
+        let fileMenu = NSMenu(title: "文件")
+        fileItem.submenu = fileMenu
+        fileMenu.addItem(withTitle: "在 Finder 中显示数据目录",
+                         action: #selector(revealDataDir), keyEquivalent: "")
+        fileMenu.addItem(withTitle: "重新载入", action: #selector(reloadHosts), keyEquivalent: "r")
+        NSApp.mainMenu = main
+    }
+
+    @objc func revealDataDir() {
+        NSWorkspace.shared.activateFileViewerSelecting([toolDir])
+    }
+
+    @objc func reloadHosts() {
+        loadHosts()
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
